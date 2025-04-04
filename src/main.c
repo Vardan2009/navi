@@ -55,6 +55,8 @@ void init() {
     cbreak();
     noecho();
     curs_set(0);
+    keypad(stdscr, TRUE);
+
     start_color();
 
     init_pair(_NAVI_COLORS_LISTING_NORMAL, COLOR_WHITE, COLOR_BLACK);
@@ -199,48 +201,60 @@ int main(int argc, char *argv[]) {
             wresize(win, win_height, win_width);
             wresize(stdscr, height, width);
             draw_background_win();
-        } else if (kbchar == _NAVI_KEY_SCROLLUP) {
-            cursor_selected--;
-            if (cursor_selected < 0) cursor_selected = 0;
-            if (cursor_selected < scroll_top) scroll_top = cursor_selected;
-        } else if (kbchar == _NAVI_KEY_SCROLLDOWN) {
-            cursor_selected++;
-            if (cursor_selected >= flisting_sz)
-                cursor_selected = flisting_sz - 1;
-            if (cursor_selected >=
-                scroll_top + win_height - _NAVI_LISTING_DRAWING_TOP_Y - 1)
-                scroll_top = cursor_selected - win_height +
-                             _NAVI_LISTING_DRAWING_TOP_Y + 2;
-        } else if (kbchar == _NAVI_KEY_OPEN) {
-            if (flisting[cursor_selected].type == FT_DIRECTORY) {
-                char *newpath =
-                    path_concat(pwd, flisting[cursor_selected].name);
-                if (open_dir(newpath)) {
-                    strcpy(pwd, newpath);
-                    if (scroll_top_stackptr < 256 &&
-                        cursor_selected_stackptr < 256) {
-                        scroll_top_stack[scroll_top_stackptr++] = scroll_top;
-                        cursor_selected_stack[cursor_selected_stackptr++] =
-                            cursor_selected;
+
+        } else if (kbchar == 27) {
+            kbchar = getch();
+            if (kbchar == 0x5b) {
+                kbchar = getch();
+                if (kbchar == _NAVI_KEY_SCROLLUP) {
+                    cursor_selected--;
+                    if (cursor_selected < 0) cursor_selected = 0;
+                    if (cursor_selected < scroll_top)
+                        scroll_top = cursor_selected;
+                } else if (kbchar == _NAVI_KEY_SCROLLDOWN) {
+                    cursor_selected++;
+                    if (cursor_selected >= flisting_sz)
+                        cursor_selected = flisting_sz - 1;
+                    if (cursor_selected >= scroll_top + win_height -
+                                               _NAVI_LISTING_DRAWING_TOP_Y - 1)
+                        scroll_top = cursor_selected - win_height +
+                                     _NAVI_LISTING_DRAWING_TOP_Y + 2;
+                } else if (kbchar == _NAVI_KEY_BACK) {
+                    char *newpath = path_dir(pwd);
+                    if (open_dir(newpath)) {
+                        strcpy(pwd, newpath);
+                        if (scroll_top_stackptr >= 1 &&
+                            cursor_selected_stackptr >= 1) {
+                            scroll_top =
+                                scroll_top_stack[--scroll_top_stackptr];
+                            cursor_selected = cursor_selected_stack
+                                [--cursor_selected_stackptr];
+                        } else
+                            scroll_top = cursor_selected = 0;
+                        wrefresh(win);
                     }
-                    scroll_top = cursor_selected = 0;
-                    wrefresh(win);
+                    free(newpath);
+                } else if (kbchar == _NAVI_KEY_OPEN) {
+                    if (flisting[cursor_selected].type == FT_DIRECTORY) {
+                        char *newpath =
+                            path_concat(pwd, flisting[cursor_selected].name);
+                        if (open_dir(newpath)) {
+                            strcpy(pwd, newpath);
+                            if (scroll_top_stackptr < 256 &&
+                                cursor_selected_stackptr < 256) {
+                                scroll_top_stack[scroll_top_stackptr++] =
+                                    scroll_top;
+                                cursor_selected_stack
+                                    [cursor_selected_stackptr++] =
+                                        cursor_selected;
+                            }
+                            scroll_top = cursor_selected = 0;
+                            wrefresh(win);
+                        }
+                        free(newpath);
+                    }
                 }
-                free(newpath);
             }
-        } else if (kbchar == _NAVI_KEY_BACK) {
-            char *newpath = path_dir(pwd);
-            if (open_dir(newpath)) {
-                strcpy(pwd, newpath);
-                if (scroll_top_stackptr >= 1 && cursor_selected_stackptr >= 1) {
-                    scroll_top = scroll_top_stack[--scroll_top_stackptr];
-                    cursor_selected =
-                        cursor_selected_stack[--cursor_selected_stackptr];
-                } else
-                    scroll_top = cursor_selected = 0;
-                wrefresh(win);
-            }
-            free(newpath);
         } else if (kbchar == _NAVI_KEY_SELECT) {
             if ((flags['f'] && flisting[cursor_selected].type == FT_FILE) ||
                 (flags['d'] &&
@@ -254,7 +268,7 @@ int main(int argc, char *argv[]) {
             }
         } else if (kbchar == 127) {
             if (findbuflen != 0) findbuf[--findbuflen] = 0;
-        } else if (isalnum(kbchar) || kbchar == ' ') {
+        } else if (isprint(kbchar)) {
             findbuf[findbuflen++] = kbchar;
             scroll_top = cursor_selected = 0;
         }
