@@ -1,17 +1,17 @@
-#include <ncurses.h>
-#include <stdlib.h>
-#include <locale.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 #include <ctype.h>
+#include <locale.h>
+#include <ncurses.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
-#include "table.h"
-#include "sysdep.h"
 #include "ext_table.h"
 #include "macros.h"
 #include "path.h"
+#include "sysdep.h"
+#include "table.h"
 
 FILE *og_stdout;
 
@@ -75,9 +75,8 @@ void init() {
     ext_hash_insert(".h", 0xf0fd);
     ext_hash_insert(".hpp", 0xf0fd);
 
-
-    if(!pathset) navi_get_pwd(pwd, sizeof(pwd));
-    if(!open_dir(pwd)) {
+    if (!pathset) navi_get_pwd(pwd, sizeof(pwd));
+    if (!open_dir(pwd)) {
         perror("navi: ");
         exit(1);
     }
@@ -86,7 +85,7 @@ void init() {
 void draw_background_win() {
     werase(stdscr);
     mvprintw(1, 1, "NAVI %s\n", _NAVI_VERSION);
-    
+
     mvprintw(height - 5, 1, "[  󰍽] Scroll");
     mvprintw(height - 4, 1, "[] Enter Directory");
     mvprintw(height - 3, 1, "[] Parent Directory");
@@ -94,31 +93,32 @@ void draw_background_win() {
 }
 
 int main(int argc, char *argv[]) {
-    for(int i = 1; i < argc; ++i) {
-        if(i == 1 && argv[1][0] != '-' && !pathset) {
+    for (int i = 1; i < argc; ++i) {
+        if (i == 1 && argv[1][0] != '-' && !pathset) {
             strcpy(pwd, realpath(argv[1], NULL));
             pathset = true;
             continue;
         }
 
-        if(strlen(argv[i]) != 2 || argv[i][0] != '-') {
+        if (strlen(argv[i]) != 2 || argv[i][0] != '-') {
             fprintf(stderr, "navi: invalid flag\n");
             exit(1);
         }
 
         char flag = argv[i][1];
-        if(flags[flag]) {
+        if (flags[flag]) {
             fprintf(stderr, "navi: flag -%c set multiple times\n", flag);
             exit(1);
         }
         flags[flag] = true;
-        switch(flag) {
+        switch (flag) {
             case 'v':
-                printf("NAVI: [NAV]igation [I]nterface\nVersion: %s\n", _NAVI_VERSION);
+                printf("NAVI: [NAV]igation [I]nterface\nVersion: %s\n",
+                       _NAVI_VERSION);
                 exit(0);
                 break;
             case 'm':
-                if(i >= argc - 1) {
+                if (i >= argc - 1) {
                     fprintf(stderr, "navi: -m requires input message\n");
                     exit(1);
                 }
@@ -130,42 +130,57 @@ int main(int argc, char *argv[]) {
     init();
 
     draw_background_win();
-    
 
-    while(true) {
+    while (true) {
         werase(win);
 
         if (findbuflen > 0)
-            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,"Finding: %s█ ", findbuf);
-        else 
-            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,"%s", pwd);
+            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,
+                      "Finding: %s█ ", findbuf);
+        else
+            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,
+                      "%s", pwd);
 
-        if(flags['m'] && prompt_message)
-            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,"%s", prompt_message);
+        if (flags['m'] && prompt_message)
+            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
+                      "%s", prompt_message);
 
-        if(flisting_sz != 0) {
+        if (flisting_sz != 0) {
             int curpos = 0;
-            for(int i = scroll_top; curpos < MIN(win_height - _NAVI_LISTING_DRAWING_TOP_Y, flisting_sz) ; ++i) {
+            for (int i = scroll_top;
+                 curpos <
+                 MIN(win_height - _NAVI_LISTING_DRAWING_TOP_Y, flisting_sz);
+                 ++i) {
                 bool greyed_out = false;
-                if(
-                    (findbuflen > 0 && !strcasestr(flisting[i].name, findbuf)) ||
-                    (flags['d'] && flisting[i].type != FT_DIRECTORY && !flags['f']) || 
-                    (flags['f'] && flisting[i].type != FT_FILE && !flags['d']) 
-                ) {
+                if ((findbuflen > 0 &&
+                     !strcasestr(flisting[i].name, findbuf)) ||
+                    (flags['d'] && flisting[i].type != FT_DIRECTORY &&
+                     !flags['f']) ||
+                    (flags['f'] && flisting[i].type != FT_FILE &&
+                     !flags['d'])) {
                     greyed_out = true;
                     wattron(win, COLOR_PAIR(3));
                 }
-                if(i == cursor_selected) wattron(win, COLOR_PAIR(greyed_out ? 4 : 2));
+                if (i == cursor_selected)
+                    wattron(win, COLOR_PAIR(greyed_out ? 4 : 2));
 
                 file_t file = flisting[i];
-                wchar_t icon = file.type == FT_DIRECTORY ? _NAVI_DEFAULT_DIRECTORY_ICON : ext_hash_lookup(strchr(flisting[i].name, '.'));
+                wchar_t icon =
+                    file.type == FT_DIRECTORY
+                        ? _NAVI_DEFAULT_DIRECTORY_ICON
+                        : ext_hash_lookup(strchr(flisting[i].name, '.'));
 
-                mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y, _NAVI_LISTING_DRAWING_TOP_X, "%lc %s", icon, file.name);
+                mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
+                          _NAVI_LISTING_DRAWING_TOP_X, "%lc %s", icon,
+                          file.name);
 
-                if(i == cursor_selected || greyed_out) wattroff(win, COLOR_PAIR(2));
+                if (i == cursor_selected || greyed_out)
+                    wattroff(win, COLOR_PAIR(2));
                 ++curpos;
             }
-        } else mvwprintw(win, _NAVI_LISTING_DRAWING_TOP_Y, _NAVI_LISTING_DRAWING_TOP_X, "<empty>");
+        } else
+            mvwprintw(win, _NAVI_LISTING_DRAWING_TOP_Y,
+                      _NAVI_LISTING_DRAWING_TOP_X, "<empty>");
 
         print_table_borders();
 
@@ -174,7 +189,7 @@ int main(int argc, char *argv[]) {
 
         kbchar = wgetch(win);
 
-        if(kbchar == _NAVI_KEY_RESIZE) {
+        if (kbchar == _NAVI_KEY_RESIZE) {
             recalculate_table_bounds();
             mvwin(win, start_y, start_x);
             wresize(win, win_height, win_width);
@@ -182,21 +197,27 @@ int main(int argc, char *argv[]) {
             draw_background_win();
         } else if (kbchar == _NAVI_KEY_SCROLLUP) {
             cursor_selected--;
-            if(cursor_selected < 0) cursor_selected = 0;
-            if(cursor_selected < scroll_top) scroll_top = cursor_selected;
+            if (cursor_selected < 0) cursor_selected = 0;
+            if (cursor_selected < scroll_top) scroll_top = cursor_selected;
         } else if (kbchar == _NAVI_KEY_SCROLLDOWN) {
             cursor_selected++;
-            if(cursor_selected >= flisting_sz) cursor_selected = flisting_sz - 1;
-            if(cursor_selected >= scroll_top + win_height - _NAVI_LISTING_DRAWING_TOP_Y - 1)
-                scroll_top = cursor_selected - win_height + _NAVI_LISTING_DRAWING_TOP_Y + 2;
+            if (cursor_selected >= flisting_sz)
+                cursor_selected = flisting_sz - 1;
+            if (cursor_selected >=
+                scroll_top + win_height - _NAVI_LISTING_DRAWING_TOP_Y - 1)
+                scroll_top = cursor_selected - win_height +
+                             _NAVI_LISTING_DRAWING_TOP_Y + 2;
         } else if (kbchar == _NAVI_KEY_OPEN) {
-            if(flisting[cursor_selected].type == FT_DIRECTORY) {
-                char *newpath = path_concat(pwd, flisting[cursor_selected].name);
-                if(open_dir(newpath)) {
+            if (flisting[cursor_selected].type == FT_DIRECTORY) {
+                char *newpath =
+                    path_concat(pwd, flisting[cursor_selected].name);
+                if (open_dir(newpath)) {
                     strcpy(pwd, newpath);
-                    if(scroll_top_stackptr < 256 && cursor_selected_stackptr < 256) {
+                    if (scroll_top_stackptr < 256 &&
+                        cursor_selected_stackptr < 256) {
                         scroll_top_stack[scroll_top_stackptr++] = scroll_top;
-                        cursor_selected_stack[cursor_selected_stackptr++] = cursor_selected;
+                        cursor_selected_stack[cursor_selected_stackptr++] =
+                            cursor_selected;
                     }
                     scroll_top = cursor_selected = 0;
                     wrefresh(win);
@@ -205,29 +226,30 @@ int main(int argc, char *argv[]) {
             }
         } else if (kbchar == _NAVI_KEY_BACK) {
             char *newpath = path_dir(pwd);
-            if(open_dir(newpath)) {
+            if (open_dir(newpath)) {
                 strcpy(pwd, newpath);
-                if(scroll_top_stackptr >= 1 && cursor_selected_stackptr >= 1) {
+                if (scroll_top_stackptr >= 1 && cursor_selected_stackptr >= 1) {
                     scroll_top = scroll_top_stack[--scroll_top_stackptr];
-                    cursor_selected = cursor_selected_stack[--cursor_selected_stackptr];
-                } else scroll_top = cursor_selected = 0;
+                    cursor_selected =
+                        cursor_selected_stack[--cursor_selected_stackptr];
+                } else
+                    scroll_top = cursor_selected = 0;
                 wrefresh(win);
             }
             free(newpath);
         } else if (kbchar == _NAVI_KEY_SELECT) {
-            if(
-                (flags['f'] && flisting[cursor_selected].type == FT_FILE) ||
-                (flags['d'] && flisting[cursor_selected].type == FT_DIRECTORY) ||
-                (!flags['f'] && !flags['d'])
-            ) {
-                char *newpath = path_concat(pwd, flisting[cursor_selected].name);
+            if ((flags['f'] && flisting[cursor_selected].type == FT_FILE) ||
+                (flags['d'] &&
+                 flisting[cursor_selected].type == FT_DIRECTORY) ||
+                (!flags['f'] && !flags['d'])) {
+                char *newpath =
+                    path_concat(pwd, flisting[cursor_selected].name);
                 strcpy(pwd, newpath);
                 free(newpath);
                 break;
             }
         } else if (kbchar == 127) {
-            if(findbuflen != 0)
-                findbuf[--findbuflen] = 0;
+            if (findbuflen != 0) findbuf[--findbuflen] = 0;
         } else if (isalnum(kbchar) || kbchar == ' ') {
             findbuf[findbuflen++] = kbchar;
             scroll_top = cursor_selected = 0;

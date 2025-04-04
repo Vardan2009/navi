@@ -53,6 +53,4 @@ char *path_dir(const char *path) {
     strncpy(parent_path, path, parent_len);
     parent_path[parent_len] = '\0';
     return parent_path;
-
-   
 }

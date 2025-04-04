@@ -21,4 +21,4 @@
 #define _NAVI_DEFAULT_FILE_ICON 0xf4a5
 #define _NAVI_DEFAULT_DIRECTORY_ICON 0xf413
 
-#endif // _NAVI_CONFIG_H
+#endif  // _NAVI_CONFIG_H

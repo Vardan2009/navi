@@ -15,7 +15,7 @@ void recalculate_table_bounds() {
     win_height = (height * 70 / 100);
     win_width = (width * 70 / 100);
 
-    if(height < 20 || width < 20) {
+    if (height < 20 || width < 20) {
         win_height = height;
         win_width = width;
     }
@@ -24,10 +24,10 @@ void recalculate_table_bounds() {
     start_x = (width - win_width) / 2;
 }
 
-void draw_horizontal_border(int y, const char* left, const char* middle, const char* right) {
+void draw_horizontal_border(int y, const char *left, const char *middle,
+                            const char *right) {
     mvwprintw(win, y, 0, "%s", left);
-    for (int x = 1; x < win_width - 1; ++x)
-        mvwprintw(win, y, x, "%s", middle);
+    for (int x = 1; x < win_width - 1; ++x) mvwprintw(win, y, x, "%s", middle);
     mvwprintw(win, y, win_width - 1, "%s", right);
 }
 
@@ -37,7 +37,6 @@ void draw_vertical_borders() {
         mvwprintw(win, y, win_width - 1, "│");
     }
 }
-
 
 void print_table_borders() {
     draw_horizontal_border(0, "┌", "─", "┐");

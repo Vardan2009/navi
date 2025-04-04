@@ -71,9 +71,7 @@ int navi_list_dir(const char *path, file_t *buffer, int max_buffer_sz) {
 #ifdef _WIN32
     WIN32_FIND_DATA find_file_data;
     HANDLE h_find = FindFirstFile(path, &find_file_data);
-    if (h_find == INVALID_HANDLE_VALUE) {
-        return 1;
-    }
+    if (h_find == INVALID_HANDLE_VALUE) { return 1; }
 
     do {
         file_t f;
@@ -89,9 +87,7 @@ int navi_list_dir(const char *path, file_t *buffer, int max_buffer_sz) {
 #else
 
     DIR *d = opendir(path);
-    if (!d) {
-        return 1;
-    }
+    if (!d) { return 1; }
 
     struct dirent *entry;
     struct stat statbuf;
