@@ -57,15 +57,15 @@ void init() {
     curs_set(0);
     start_color();
 
-    init_pair(1, COLOR_WHITE, COLOR_BLACK);
-    init_pair(2, COLOR_WHITE, COLOR_RED);
-    init_pair(3, 8, COLOR_BLACK);
-    init_pair(4, 8, COLOR_RED);
+    init_pair(_NAVI_COLORS_LISTING_NORMAL, COLOR_WHITE, COLOR_BLACK);
+    init_pair(_NAVI_COLORS_LISTING_HIGHLIGHTED, COLOR_WHITE, COLOR_RED);
+    init_pair(_NAVI_COLORS_LISTING_DIMMED, 8, COLOR_BLACK);
+    init_pair(_NAVI_COLORS_LISTING_DIMMED_HIGHLIGHTED, 8, COLOR_RED);
 
     recalculate_table_bounds();
 
     win = newwin(win_height, win_width, start_y, start_x);
-    bkgd(COLOR_PAIR(1));
+    bkgd(COLOR_PAIR(_NAVI_COLORS_LISTING_NORMAL));
 
     ext_hash_insert(".txt", 0xf15c);
     ext_hash_insert(".clang-format", 0xe615);
@@ -159,10 +159,14 @@ int main(int argc, char *argv[]) {
                     (flags['f'] && flisting[i].type != FT_FILE &&
                      !flags['d'])) {
                     greyed_out = true;
-                    wattron(win, COLOR_PAIR(3));
+                    wattron(win, COLOR_PAIR(_NAVI_COLORS_LISTING_DIMMED));
                 }
                 if (i == cursor_selected)
-                    wattron(win, COLOR_PAIR(greyed_out ? 4 : 2));
+                    wattron(
+                        win,
+                        COLOR_PAIR(greyed_out
+                                       ? _NAVI_COLORS_LISTING_DIMMED_HIGHLIGHTED
+                                       : _NAVI_COLORS_LISTING_HIGHLIGHTED));
 
                 file_t file = flisting[i];
                 wchar_t icon =
@@ -175,7 +179,7 @@ int main(int argc, char *argv[]) {
                           file.name);
 
                 if (i == cursor_selected || greyed_out)
-                    wattroff(win, COLOR_PAIR(2));
+                    wattroff(win, COLOR_PAIR(_NAVI_COLORS_LISTING_HIGHLIGHTED));
                 ++curpos;
             }
         } else
