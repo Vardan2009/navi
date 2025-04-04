@@ -136,16 +136,15 @@ int main(int argc, char *argv[]) {
     while (true) {
         werase(win);
 
-        if (findbuflen > 0)
-            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,
-                      " %s█ ", findbuf);
-        else
-            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,
-                      "󱞊 %s", pwd);
+        mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,
+                  "󱞊 %s", pwd);
 
-        if (flags['m'] && prompt_message)
+        if (findbuflen > 0)
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
-                      "%s", prompt_message);
+                      " %s█", findbuf);
+        else if (flags['m'] && prompt_message)
+            mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
+                      " %s", prompt_message);
 
         if (flisting_sz != 0) {
             int curpos = 0;
