@@ -138,10 +138,10 @@ int main(int argc, char *argv[]) {
 
         if (findbuflen > 0)
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,
-                      "Finding: %s█ ", findbuf);
+                      " %s█ ", findbuf);
         else
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,
-                      "%s", pwd);
+                      "󱞊 %s", pwd);
 
         if (flags['m'] && prompt_message)
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
