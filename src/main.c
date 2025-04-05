@@ -54,8 +54,6 @@ bool open_dir(char *dir) {
 }
 
 void init() {
-    parse_apply_navi_cfg();
-
     // this is pretty stupid, i know
     // i couldn't find a better solution to this
     og_stdout = stdout;
@@ -70,6 +68,8 @@ void init() {
     keypad(stdscr, TRUE);
 
     start_color();
+
+    parse_apply_navi_cfg();
 
     init_pair(_NAVI_COLORS_LISTING_NORMAL, fg_color, bg_color);
     init_pair(_NAVI_COLORS_LISTING_HIGHLIGHTED, fg_color, hl_color);
@@ -112,6 +112,37 @@ void draw_background_win() {
         mvprintw(height - 3, 1, "[left arrow] Parent Directory");
         mvprintw(height - 2, 1, "[return] Select");
     }
+}
+
+void navi_errorf(const char *title, const char *format, ...) {
+    char buffer[1024];
+    va_list args;
+
+    va_start(args, format);
+
+    int written = vsnprintf(buffer, sizeof(buffer), format, args);
+
+    win_height = 12;
+    win_width = written * 2;
+
+    start_y = (LINES - win_height) / 2;
+    start_x = (COLS - win_width) / 2;
+
+    WINDOW *errwin = newwin(win_height, win_width, start_y, start_x);
+
+    mvwprintw(errwin, 1, 1, "[ERROR] %s", title);
+    mvwprintw(errwin, 3, 1, "%s", buffer);
+    mvwprintw(errwin, win_height - 2, 1, "[OK]");
+
+    print_table_borders(errwin, win_width, win_height, 2);
+
+    refresh();
+    wrefresh(errwin);
+
+    getch();
+    delwin(errwin);
+
+    va_end(args);
 }
 
 int main(int argc, char *argv[]) {
@@ -217,7 +248,7 @@ int main(int argc, char *argv[]) {
             mvwprintw(win, _NAVI_LISTING_DRAWING_TOP_Y,
                       _NAVI_LISTING_DRAWING_TOP_X, "<empty>");
 
-        print_table_borders();
+        print_table_borders(win, win_width, win_height, 3);
 
         refresh();
         wrefresh(win);

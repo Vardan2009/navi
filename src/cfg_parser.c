@@ -23,6 +23,7 @@ void split_key_value(char *str, char **key, char **value) {
     if (equals_pos == NULL) {
         *key = NULL;
         *value = NULL;
+        navi_errorf("navi.cfg", "Invalid syntax, '=' not found");
         return;
     }
 
@@ -50,22 +51,40 @@ void parse_apply_navi_cfg() {
     while (fgets(lnbuf, lnbuflen, fp)) {
         lnbufptr = (char *)lnbuf;
         while (isspace(*lnbufptr)) ++lnbufptr;
-        if (*lnbufptr == '#') continue;
+        if (*lnbufptr == '#' || *lnbufptr == 0) continue;
 
         split_key_value(lnbufptr, &keypart, &valuepart);
         if (!keypart || !valuepart) continue;
 
         // inefficient code, a better apporach would be to use a hashmap
+        char *endptr = NULL;
         if (strcmp(keypart, "NAVI_USE_NF") == 0)
             use_nf = (strcmp(valuepart, "true") == 0);
-        else if (strcmp(keypart, "NAVI_FG_COL") == 0)
-            fg_color = atoi(valuepart);
-        else if (strcmp(keypart, "NAVI_BG_COL") == 0)
-            bg_color = atoi(valuepart);
-        else if (strcmp(keypart, "NAVI_HL_COL") == 0)
-            hl_color = atoi(valuepart);
-        else if (strcmp(keypart, "NAVI_DIM_COL") == 0)
-            dim_color = atoi(valuepart);
+        else if (strcmp(keypart, "NAVI_FG_COL") == 0) {
+            fg_color = strtol(valuepart, &endptr, 10);
+            if (*endptr != '\0')
+                navi_errorf("navi.cfg", "Invalid value for %s: `%s`", keypart,
+                            valuepart);
+        } else if (strcmp(keypart, "NAVI_BG_COL") == 0) {
+            bg_color = strtol(valuepart, &endptr, 10);
+
+            if (*endptr != '\0')
+                navi_errorf("navi.cfg", "Invalid value for %s: `%s`", keypart,
+                            valuepart);
+        } else if (strcmp(keypart, "NAVI_HL_COL") == 0) {
+            hl_color = strtol(valuepart, &endptr, 10);
+
+            if (*endptr != '\0')
+                navi_errorf("navi.cfg", "Invalid value for %s: `%s`", keypart,
+                            valuepart);
+        } else if (strcmp(keypart, "NAVI_DIM_COL") == 0) {
+            dim_color = strtol(valuepart, &endptr, 10);
+
+            if (*endptr != '\0')
+                navi_errorf("navi.cfg", "Invalid value for %s: `%s`", keypart,
+                            valuepart);
+        } else
+            navi_errorf("navi.cfg", "Invalid key `%s`", keypart);
     }
 
     fclose(fp);
