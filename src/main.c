@@ -231,10 +231,10 @@ int main(int argc, char *argv[]) {
             wresize(stdscr, height, width);
             draw_background_win();
 
-        } else if (kbchar == 27) {
-            kbchar = getch();
+        } else if (kbchar == 0x1b) {
+            kbchar = wgetch(win);
             if (kbchar == 0x5b) {
-                kbchar = getch();
+                kbchar = wgetch(win);
                 if (kbchar == _NAVI_KEY_SCROLLUP) {
                     cursor_selected--;
                     if (cursor_selected < 0) cursor_selected = 0;
@@ -282,8 +282,10 @@ int main(int argc, char *argv[]) {
                         }
                         free(newpath);
                     }
-                }
-            }
+                } else
+                    ungetch(kbchar);
+            } else
+                ungetch(kbchar);
         } else if (kbchar == _NAVI_KEY_SELECT) {
             if ((flags['f'] && flisting[cursor_selected].type == FT_FILE) ||
                 (flags['d'] &&
