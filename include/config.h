@@ -21,9 +21,12 @@
 #define _NAVI_DEFAULT_FILE_ICON 0xf4a5
 #define _NAVI_DEFAULT_DIRECTORY_ICON 0xf413
 
+// NOTE: These are color pair numbers, not actual color definitions
 #define _NAVI_COLORS_LISTING_NORMAL 1
 #define _NAVI_COLORS_LISTING_HIGHLIGHTED 2
 #define _NAVI_COLORS_LISTING_DIMMED 3
 #define _NAVI_COLORS_LISTING_DIMMED_HIGHLIGHTED 4
+
+#define _NAVI_CFG_FILE_LOCATION "../navi.cfg"
 
 #endif  // _NAVI_CONFIG_H

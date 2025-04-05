@@ -1,3 +1,5 @@
+#include "main.h"
+
 #include <ctype.h>
 #include <locale.h>
 #include <ncurses.h>
@@ -6,8 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cfg_parser.h"
 #include "config.h"
 #include "ext_table.h"
+#include "file.h"
 #include "macros.h"
 #include "path.h"
 #include "sysdep.h"
@@ -34,6 +38,12 @@ int cursor_selected_stack[256];
 int scroll_top_stackptr = 0;
 int cursor_selected_stackptr = 0;
 
+int fg_color = COLOR_WHITE;
+int bg_color = COLOR_BLACK;
+int hl_color = COLOR_RED;
+int dim_color = 8;
+bool use_nf = true;
+
 bool open_dir(char *dir) {
     int count = navi_count_entries(dir);
     if (count == -1) return false;
@@ -44,6 +54,8 @@ bool open_dir(char *dir) {
 }
 
 void init() {
+    parse_apply_navi_cfg();
+
     // this is pretty stupid, i know
     // i couldn't find a better solution to this
     og_stdout = stdout;
@@ -59,15 +71,16 @@ void init() {
 
     start_color();
 
-    init_pair(_NAVI_COLORS_LISTING_NORMAL, COLOR_WHITE, COLOR_BLACK);
-    init_pair(_NAVI_COLORS_LISTING_HIGHLIGHTED, COLOR_WHITE, COLOR_RED);
-    init_pair(_NAVI_COLORS_LISTING_DIMMED, 8, COLOR_BLACK);
-    init_pair(_NAVI_COLORS_LISTING_DIMMED_HIGHLIGHTED, 8, COLOR_RED);
+    init_pair(_NAVI_COLORS_LISTING_NORMAL, fg_color, bg_color);
+    init_pair(_NAVI_COLORS_LISTING_HIGHLIGHTED, fg_color, hl_color);
+    init_pair(_NAVI_COLORS_LISTING_DIMMED, dim_color, bg_color);
+    init_pair(_NAVI_COLORS_LISTING_DIMMED_HIGHLIGHTED, dim_color, hl_color);
 
     recalculate_table_bounds();
 
     win = newwin(win_height, win_width, start_y, start_x);
     bkgd(COLOR_PAIR(_NAVI_COLORS_LISTING_NORMAL));
+    wbkgd(win, COLOR_PAIR(_NAVI_COLORS_LISTING_NORMAL));
 
     ext_hash_insert(".txt", 0xf15c);
     ext_hash_insert(".clang-format", 0xe615);
@@ -88,10 +101,17 @@ void draw_background_win() {
     werase(stdscr);
     mvprintw(1, 1, "NAVI %s\n", _NAVI_VERSION);
 
-    mvprintw(height - 5, 1, "[  󰍽] Scroll");
-    mvprintw(height - 4, 1, "[] Enter Directory");
-    mvprintw(height - 3, 1, "[] Parent Directory");
-    mvprintw(height - 2, 1, "[󰌑] Select");
+    if (use_nf) {
+        mvprintw(height - 5, 1, "[  󰍽] Scroll");
+        mvprintw(height - 4, 1, "[] Enter Directory");
+        mvprintw(height - 3, 1, "[] Parent Directory");
+        mvprintw(height - 2, 1, "[󰌑] Select");
+    } else {
+        mvprintw(height - 5, 1, "[up/down/scroll] Scroll");
+        mvprintw(height - 4, 1, "[right arrow] Enter Directory");
+        mvprintw(height - 3, 1, "[left arrow] Parent Directory");
+        mvprintw(height - 2, 1, "[return] Select");
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -137,14 +157,14 @@ int main(int argc, char *argv[]) {
         werase(win);
 
         mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y, _NAVI_PWD_DRAWING_TOP_X,
-                  "󱞊 %s", pwd);
+                  use_nf ? "󱞊 %s" : "[PWD] %s", pwd);
 
-        if (findbuflen > 0)
+        if (findbuflen > 0) {
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
-                      " %s█", findbuf);
-        else if (flags['m'] && prompt_message)
+                      use_nf ? " %s█" : "[SEARCH] %s|", findbuf);
+        } else if (flags['m'] && prompt_message)
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
-                      " %s", prompt_message);
+                      use_nf ? " %s" : "[PROMPT] %s", prompt_message);
 
         if (flisting_sz != 0) {
             int curpos = 0;
@@ -162,25 +182,35 @@ int main(int argc, char *argv[]) {
                     greyed_out = true;
                     wattron(win, COLOR_PAIR(_NAVI_COLORS_LISTING_DIMMED));
                 }
+
+                int color_pair =
+                    COLOR_PAIR(greyed_out ? _NAVI_COLORS_LISTING_DIMMED
+                                          : _NAVI_COLORS_LISTING_NORMAL);
+
                 if (i == cursor_selected)
-                    wattron(
-                        win,
-                        COLOR_PAIR(greyed_out
-                                       ? _NAVI_COLORS_LISTING_DIMMED_HIGHLIGHTED
-                                       : _NAVI_COLORS_LISTING_HIGHLIGHTED));
+                    color_pair = COLOR_PAIR(
+                        greyed_out ? _NAVI_COLORS_LISTING_DIMMED_HIGHLIGHTED
+                                   : _NAVI_COLORS_LISTING_HIGHLIGHTED);
+
+                wattron(win, color_pair);
 
                 file_t file = flisting[i];
-                wchar_t icon =
-                    file.type == FT_DIRECTORY
-                        ? _NAVI_DEFAULT_DIRECTORY_ICON
-                        : ext_hash_lookup(strchr(flisting[i].name, '.'));
+                if (use_nf) {
+                    wchar_t icon =
+                        file.type == FT_DIRECTORY
+                            ? _NAVI_DEFAULT_DIRECTORY_ICON
+                            : ext_hash_lookup(strchr(flisting[i].name, '.'));
 
-                mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
-                          _NAVI_LISTING_DRAWING_TOP_X, "%lc %s", icon,
-                          file.name);
+                    mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
+                              _NAVI_LISTING_DRAWING_TOP_X, "%lc %s", icon,
+                              file.name);
+                } else
+                    mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
+                              _NAVI_LISTING_DRAWING_TOP_X, "%c %s",
+                              file.type == FT_DIRECTORY ? 'D' : 'F', file.name);
 
-                if (i == cursor_selected || greyed_out)
-                    wattroff(win, COLOR_PAIR(_NAVI_COLORS_LISTING_HIGHLIGHTED));
+                // if (i == cursor_selected || greyed_out)
+                wattroff(win, color_pair);
                 ++curpos;
             }
         } else

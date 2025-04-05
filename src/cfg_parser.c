@@ -1,0 +1,72 @@
+#include "cfg_parser.h"
+
+#include <ctype.h>
+#include <ncurses.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "config.h"
+#include "main.h"
+
+void trim_whitespaces(char *str) {
+    while (isspace((unsigned char)*str)) ++str;
+    char *end = str + strlen(str) - 1;
+    while (end > str && isspace((unsigned char)*end)) end--;
+
+    *(end + 1) = 0;
+}
+
+void split_key_value(char *str, char **key, char **value) {
+    char *equals_pos = strchr(str, '=');
+    if (equals_pos == NULL) {
+        *key = NULL;
+        *value = NULL;
+        return;
+    }
+
+    *equals_pos = 0;
+
+    *key = str;
+    *value = equals_pos + 1;
+
+    trim_whitespaces(*key);
+    trim_whitespaces(*value);
+}
+
+void parse_apply_navi_cfg() {
+    static const size_t lnbuflen = 128;
+    static const size_t lnpartbuflen = 64;
+
+    char lnbuf[lnbuflen];
+    char *keypart, *valuepart;
+
+    char *lnbufptr = NULL;
+
+    FILE *fp = fopen(_NAVI_CFG_FILE_LOCATION, "r");
+    if (fp == NULL) return;
+
+    while (fgets(lnbuf, lnbuflen, fp)) {
+        lnbufptr = (char *)lnbuf;
+        while (isspace(*lnbufptr)) ++lnbufptr;
+        if (*lnbufptr == '#') continue;
+
+        split_key_value(lnbufptr, &keypart, &valuepart);
+        if (!keypart || !valuepart) continue;
+
+        // inefficient code, a better apporach would be to use a hashmap
+        if (strcmp(keypart, "NAVI_USE_NF") == 0)
+            use_nf = (strcmp(valuepart, "true") == 0);
+        else if (strcmp(keypart, "NAVI_FG_COL") == 0)
+            fg_color = atoi(valuepart);
+        else if (strcmp(keypart, "NAVI_BG_COL") == 0)
+            bg_color = atoi(valuepart);
+        else if (strcmp(keypart, "NAVI_HL_COL") == 0)
+            hl_color = atoi(valuepart);
+        else if (strcmp(keypart, "NAVI_DIM_COL") == 0)
+            dim_color = atoi(valuepart);
+    }
+
+    fclose(fp);
+}
