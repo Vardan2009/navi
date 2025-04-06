@@ -13,6 +13,7 @@ path=$(navi ~ -m "Select a file")
 ## Features
 - File Traversal (Entering/Leaving directories)
 - Basic Searching
+- Customization with configuration files 
 
 ## Usage
 ```bash
