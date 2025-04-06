@@ -27,6 +27,33 @@
 #define _NAVI_COLORS_LISTING_DIMMED 3
 #define _NAVI_COLORS_LISTING_DIMMED_HIGHLIGHTED 4
 
-#define _NAVI_CFG_FILE_LOCATION "../navi.cfg"
+#ifdef _WIN32
+
+#define _NAVI_PATH_DIV '\\'
+
+#define _NAVI_CFG_FILE_LOCATION "AppData\\Local\\navi.cfg"
+
+#define _NAVI_HOME_ENV_VAR "USERPROFILE"
+
+#elif defined(__APPLE__) && defined(__MACH__)
+
+#define _NAVI_PATH_DIV '/'
+
+#define _NAVI_HOME_ENV_VAR "HOME"
+
+#define _NAVI_CFG_FILE_LOCATION "Library/Application Support/navi.cfg"
+
+#elif defined(__linux__)
+
+#define _NAVI_PATH_DIV '/'
+
+#define _NAVI_CFG_FILE_LOCATION ".config/navi.cfg"
+#define _NAVI_HOME_ENV_VAR "HOME"
+
+#else
+
+#error "config.h: Unsupported platform"
+
+#endif
 
 #endif  // _NAVI_CONFIG_H

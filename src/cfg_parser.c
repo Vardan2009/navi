@@ -45,8 +45,24 @@ void parse_apply_navi_cfg() {
 
     char *lnbufptr = NULL;
 
-    FILE *fp = fopen(_NAVI_CFG_FILE_LOCATION, "r");
-    if (fp == NULL) return;
+    const char *home = getenv(_NAVI_HOME_ENV_VAR);
+    if (home == NULL) {
+        fprintf(stderr, "%s environment variable is not set.\n",
+                _NAVI_HOME_ENV_VAR);
+        return;
+    }
+
+    char file_path[1024];
+    snprintf(file_path, sizeof(file_path), "%s%c%s", home, _NAVI_PATH_DIV,
+             _NAVI_CFG_FILE_LOCATION);
+
+    FILE *fp = fopen(file_path, "r");
+    if (fp == NULL) /* {
+        navi_errorf("navi.cfg", "Failed to open config file at %s", file_path);
+        return;
+    } */
+        // the navi.cfg file is optional
+        return;
 
     while (fgets(lnbuf, lnbuflen, fp)) {
         lnbufptr = (char *)lnbuf;

@@ -10,13 +10,15 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#else
+#elif defined(__linux__)
 #include <dirent.h>
 #include <linux/limits.h>
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
-#endif  // _WIN32
+#else
+#error "sysdep.c: Unsupported platform"
+#endif
 
 // WARN: WINDOWS FUNCTIONS UNTESTED
 
