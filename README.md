@@ -27,19 +27,15 @@ navi [path] [-f] [-d] [-m "Message"]
 ### 1. Install the NCurses library
 *Example with apt*
 ```bash
-$ sudo apt-get install libncurses-dev
+sudo apt-get install libncurses-dev
 ```
-### 2. Locate `libncursesw.so`
-*I couldn't get CMake to automatically get the library*
+**Make sure to also install NCursesW for Unicode character support**
+
+### 2. Use CMake to build
 ```bash
-$ locate libncursesw.so
-/path/to/libncursesw.so
+mkdir build
+cd build
+cmake ..
+make
 ```
-### 3. Change the path to `libncursesw.so` in `/CMakeLists.txt`
-### 4. Use CMake to build
-```bash
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make
-```
+*or use the `/test.sh` file*
