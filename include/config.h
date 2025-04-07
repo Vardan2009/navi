@@ -4,11 +4,11 @@
 #define _NAVI_VERSION "0.1"
 
 #define _NAVI_LISTING_DRAWING_TOP_Y 4
-#define _NAVI_LISTING_DRAWING_TOP_X 1
+#define _NAVI_LISTING_DRAWING_TOP_X 2
 
 #define _NAVI_LISTING_DRAWING_BOTTOM_Y 3
 
-#define _NAVI_PWD_DRAWING_TOP_X 1
+#define _NAVI_PWD_DRAWING_TOP_X 2
 #define _NAVI_PWD_DRAWING_TOP_Y 1
 
 // -102 is the character injected to stdin when

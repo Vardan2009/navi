@@ -211,11 +211,11 @@ int main(int argc, char *argv[]) {
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
                       use_nf ? " %s" : "[PROMPT] %s", prompt_message);
 
-        mvwprintw(win, win_height - 1 - 1, _NAVI_PWD_DRAWING_TOP_X + 1,
+        mvwprintw(win, win_height - 1 - 1, _NAVI_PWD_DRAWING_TOP_X,
                   "%d of %d entries", cursor_selected + 1, flisting_sz);
 
         mvwprintw(win, win_height - 2,
-                  win_width - 6 - 1 - _NAVI_LISTING_DRAWING_TOP_X,
+                  win_width - 6 - _NAVI_LISTING_DRAWING_TOP_X,
                   use_nf ? " %d%%" : "[SCROLL] %d%%",
                   (int)(((cursor_selected + 1) / (float)flisting_sz) * 100));
 
