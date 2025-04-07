@@ -200,8 +200,8 @@ int main(int argc, char *argv[]) {
         if (flisting_sz != 0) {
             int curpos = 0;
             for (int i = scroll_top;
-                 curpos <
-                 MIN(win_height - _NAVI_LISTING_DRAWING_TOP_Y, flisting_sz);
+                 curpos < MIN((win_height - _NAVI_LISTING_DRAWING_TOP_Y),
+                              flisting_sz - scroll_top);
                  ++i) {
                 bool greyed_out = false;
                 if ((findbuflen > 0 &&
