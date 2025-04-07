@@ -136,19 +136,21 @@ void navi_errorf(const char *title, const char *format, ...) {
 
     int written = vsnprintf(buffer, sizeof(buffer), format, args);
 
-    win_height = 12;
-    win_width = written * 2;
+    int win_height = 12;
+    int win_width = written * 2;
 
-    start_y = (LINES - win_height) / 2;
-    start_x = (COLS - win_width) / 2;
+    int start_y = (LINES - win_height) / 2;
+    int start_x = (COLS - win_width) / 2;
 
     WINDOW *errwin = newwin(win_height, win_width, start_y, start_x);
 
-    mvwprintw(errwin, 1, 1, "[ERROR] %s", title);
-    mvwprintw(errwin, 3, 1, "%s", buffer);
-    mvwprintw(errwin, win_height - 2, 1, "[OK]");
+    mvwprintw(errwin, 1, 2, use_nf ? " %s" : "[ERROR] %s", title);
+    mvwprintw(errwin, 3, 2, "%s", buffer);
+    mvwprintw(errwin, win_height - 2, win_width - 8,
+              use_nf ? "[󰌌] OK" : "[any key] OK");
 
-    print_table_borders(errwin, win_width, win_height, (int[]){2}, 1);
+    print_table_borders(errwin, win_width, win_height,
+                        (int[]){2, win_height - 3}, 2);
 
     refresh();
     wrefresh(errwin);
