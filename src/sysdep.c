@@ -7,6 +7,7 @@
 #include <wchar.h>
 
 #include "file.h"
+#include "main.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -37,7 +38,7 @@ int navi_count_entries(const char *path) {
     int count = 0;
 
     if (hFind == INVALID_HANDLE_VALUE) {
-        printf("Error opening directory\n");
+        navi_errorf("Filesystem", "Failed to open directory");
         return -1;
     }
 
@@ -61,6 +62,7 @@ int navi_count_entries(const char *path) {
         }
         closedir(d);
     } else {
+        navi_errorf("Filesystem", "Failed to open directory");
         return -1;
     }
     return count;
@@ -111,6 +113,7 @@ int navi_list_dir(const char *path, file_t *buffer, int max_buffer_sz) {
             strncpy(f.name, entry->d_name, 32);
             buffer[buffer_sz++] = f;
         } else {
+            navi_errorf("Filesystem", "Failed to read directory entry info");
             return 1;
         }
     }
