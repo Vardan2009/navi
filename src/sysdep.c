@@ -80,6 +80,8 @@ int navi_list_dir(const char *path, file_t *buffer, int max_buffer_sz) {
         f.type = (find_file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                      ? FT_DIRECTORY
                      : FT_FILE;
+        f.size = ((unsigned long long)find_file_data.nFileSizeHigh << 32) |
+                 find_file_data.nFileSizeLow;
         strcpy(f.name, find_file_data.cFileName);
         buffer[buffer_sz++] = f;
     } while (FindNextFile(h_find, &find_file_data) != 0 &&
@@ -87,7 +89,6 @@ int navi_list_dir(const char *path, file_t *buffer, int max_buffer_sz) {
 
     FindClose(h_find);
 #else
-
     DIR *d = opendir(path);
     if (!d) { return 1; }
 
@@ -106,6 +107,7 @@ int navi_list_dir(const char *path, file_t *buffer, int max_buffer_sz) {
         if (stat(full_path, &statbuf) == 0) {
             file_t f = {};
             f.type = (S_ISDIR(statbuf.st_mode)) ? FT_DIRECTORY : FT_FILE;
+            f.size = statbuf.st_size;
             strncpy(f.name, entry->d_name, 32);
             buffer[buffer_sz++] = f;
         } else {

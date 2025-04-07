@@ -114,6 +114,20 @@ void draw_background_win() {
     }
 }
 
+int format_size(size_t size, char *buffer, size_t buffer_sz) {
+    static const char *units[] = {"B", "KB", "MB", "GB", "TB", "PB"};
+    double size_in_units = size;
+    int unit_index = 0;
+
+    while (size_in_units >= 1024 && unit_index < 5) {
+        size_in_units /= 1024;
+        unit_index++;
+    }
+
+    return snprintf(buffer, buffer_sz, "%.1f %s", size_in_units,
+                    units[unit_index]);
+}
+
 void navi_errorf(const char *title, const char *format, ...) {
     char buffer[1024];
     va_list args;
@@ -192,7 +206,7 @@ int main(int argc, char *argv[]) {
 
         if (findbuflen > 0) {
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
-                      use_nf ? " %s█" : "[SEARCH] %s|", findbuf);
+                      use_nf ? " %s█" : "[SEARCH] %s█", findbuf);
         } else if (flags['m'] && prompt_message)
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
                       use_nf ? " %s" : "[PROMPT] %s", prompt_message);
@@ -225,6 +239,8 @@ int main(int argc, char *argv[]) {
 
                 wattron(win, color_pair);
 
+                int col1off = win_width - _NAVI_LISTING_DRAWING_TOP_X;
+
                 file_t file = flisting[i];
                 if (use_nf) {
                     wchar_t icon =
@@ -239,6 +255,17 @@ int main(int argc, char *argv[]) {
                     mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
                               _NAVI_LISTING_DRAWING_TOP_X, "%c %s",
                               file.type == FT_DIRECTORY ? 'D' : 'F', file.name);
+
+                if (file.type != FT_DIRECTORY) {
+                    static char szbuf[64];
+                    int len = format_size(file.size, szbuf, 64);
+
+                    if (len >= 0)
+                        mvwprintw(
+                            win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
+                            _NAVI_LISTING_DRAWING_TOP_X + col1off - len - 1,
+                            "%s", szbuf);
+                }
 
                 // if (i == cursor_selected || greyed_out)
                 wattroff(win, color_pair);
