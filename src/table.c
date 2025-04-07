@@ -40,12 +40,12 @@ void draw_vertical_borders(WINDOW *win, int win_width, int win_height) {
 }
 
 void print_table_borders(WINDOW *win, int win_width, int win_height,
-                         int divisor_y) {
+                         const int *divisors_y, int divisors_y_sz) {
     draw_horizontal_border(win, 0, "┌", "─", "┐", win_width, win_height);
     draw_vertical_borders(win, win_width, win_height);
     draw_horizontal_border(win, win_height - 1, "└", "─", "┘", win_width,
                            win_height);
-    if (divisor_y != -1)
-        draw_horizontal_border(win, divisor_y, "├", "─", "┤", win_width,
+    for (int i = 0; i < divisors_y_sz; ++i)
+        draw_horizontal_border(win, divisors_y[i], "├", "─", "┤", win_width,
                                win_height);
 }

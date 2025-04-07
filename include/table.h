@@ -17,6 +17,6 @@ void draw_horizontal_border(WINDOW *win, int y, const char *left,
                             int win_width, int win_height);
 void draw_vertical_borders(WINDOW *win, int win_width, int win_height);
 void print_table_borders(WINDOW *win, int win_width, int win_height,
-                         int divisor_y);
+                         const int *divisors_y, int divisors_y_sz);
 
 #endif  // _NAVI_TABLE_H

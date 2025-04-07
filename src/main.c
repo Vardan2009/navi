@@ -148,7 +148,7 @@ void navi_errorf(const char *title, const char *format, ...) {
     mvwprintw(errwin, 3, 1, "%s", buffer);
     mvwprintw(errwin, win_height - 2, 1, "[OK]");
 
-    print_table_borders(errwin, win_width, win_height, 2);
+    print_table_borders(errwin, win_width, win_height, (int[]){2}, 1);
 
     refresh();
     wrefresh(errwin);
@@ -211,10 +211,19 @@ int main(int argc, char *argv[]) {
             mvwprintw(win, _NAVI_PWD_DRAWING_TOP_Y + 1, _NAVI_PWD_DRAWING_TOP_X,
                       use_nf ? " %s" : "[PROMPT] %s", prompt_message);
 
+        mvwprintw(win, win_height - 1 - 1, _NAVI_PWD_DRAWING_TOP_X + 1,
+                  "%d of %d entries", cursor_selected + 1, flisting_sz);
+
+        mvwprintw(win, win_height - 2,
+                  win_width - 6 - 1 - _NAVI_LISTING_DRAWING_TOP_X,
+                  use_nf ? " %d%%" : "[SCROLL] %d%%",
+                  (int)(((cursor_selected + 1) / (float)flisting_sz) * 100));
+
         if (flisting_sz != 0) {
             int curpos = 0;
             for (int i = scroll_top;
-                 curpos < MIN((win_height - _NAVI_LISTING_DRAWING_TOP_Y),
+                 curpos < MIN((win_height - _NAVI_LISTING_DRAWING_TOP_Y -
+                               _NAVI_LISTING_DRAWING_BOTTOM_Y),
                               flisting_sz - scroll_top);
                  ++i) {
                 bool greyed_out = false;
@@ -275,7 +284,8 @@ int main(int argc, char *argv[]) {
             mvwprintw(win, _NAVI_LISTING_DRAWING_TOP_Y,
                       _NAVI_LISTING_DRAWING_TOP_X, "<empty>");
 
-        print_table_borders(win, win_width, win_height, 3);
+        print_table_borders(win, win_width, win_height,
+                            (int[]){3, win_height - 3}, 2);
 
         refresh();
         wrefresh(win);
@@ -303,9 +313,11 @@ int main(int argc, char *argv[]) {
                     if (cursor_selected >= flisting_sz)
                         cursor_selected = flisting_sz - 1;
                     if (cursor_selected >= scroll_top + win_height -
-                                               _NAVI_LISTING_DRAWING_TOP_Y - 1)
+                                               _NAVI_LISTING_DRAWING_TOP_Y -
+                                               _NAVI_LISTING_DRAWING_BOTTOM_Y)
                         scroll_top = cursor_selected - win_height +
-                                     _NAVI_LISTING_DRAWING_TOP_Y + 2;
+                                     _NAVI_LISTING_DRAWING_TOP_Y +
+                                     _NAVI_LISTING_DRAWING_BOTTOM_Y + 1;
                 } else if (kbchar == _NAVI_KEY_BACK) {
                     char *newpath = path_dir(pwd);
                     if (open_dir(newpath)) {
