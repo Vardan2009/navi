@@ -1,6 +1,6 @@
 ## NAVI - Command-line file picker
 
-![navi-demo](https://github.com/user-attachments/assets/f3754125-5456-4ed6-a47c-27256cc4042b)
+![navi-demo](/artwork/navi-demo.png)
 
 NAVI is a very simple, but useful file picker written in C using the NCurses library for visuals.\
 It works well with shell scripts, makefiles, e.t.c, since it just outputs the path after selecting it.
