@@ -33,7 +33,7 @@ navi [path] [-f] [-d] [-m "Message"]
 > NAVI is not tested on Windows or MacOS yet.
 
 The program attempts to load an optional configuration file stored in application data directories. If you want to customize navi, create a file at that path.
-- Windows: `%USERPROFILE%\\AppData\\Local\\navi.cfg`
+- Windows: `%USERPROFILE%\AppData\Local\navi.cfg`
 - Linux: `~/.config/navi.cfg`
 - Mac: `~/Library/Application Support/navi.cfg`\
 _Refer to [config.h](/include/config.h)_
