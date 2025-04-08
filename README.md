@@ -4,6 +4,10 @@
 
 NAVI is a very simple, but useful file picker written in C using the NCurses library for visuals.\
 It works well with shell scripts, makefiles, e.t.c, since it just outputs the path after selecting it.
+
+> [!WARNING]  
+> NAVI is not tested on Windows or MacOS yet.
+
 #### Example usage in bash
 ```bash
 path=$(navi ~ -m "Select a file")
@@ -23,6 +27,13 @@ navi [path] [-f] [-d] [-m "Message"]
 - `-f`, Only allow selecting a file
 - `-d`, Only allow selecting a directory
 - `-m`, Add an additional message
+
+## `navi.cfg` file 
+The program attempts to load an optional configuration file stored in application data directories. If you want to customize navi, create a file at that path.
+- Windows: `%USERPROFILE%\\AppData\\Local\\navi.cfg`
+- Linux: `~/.config/navi.cfg`
+- Mac: `~/Library/Application Support/navi.cfg`
+_Refer to [config.h](/include/config.h)_
 
 ## Building
 ### 1. Install the NCurses library
