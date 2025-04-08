@@ -9,6 +9,8 @@ extern int hl_color;
 extern int dim_color;
 extern bool use_nf;
 
+extern unsigned int default_dir_icon, default_file_icon;
+
 void navi_errorf(const char *title, const char *fmt, ...);
 
 #endif  // _NAVI_MAIN_H

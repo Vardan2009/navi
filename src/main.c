@@ -44,6 +44,8 @@ int hl_color = COLOR_RED;
 int dim_color = 8;
 bool use_nf = true;
 
+unsigned int default_dir_icon = 0xf413, default_file_icon = 0xf4a5;
+
 bool open_dir(char *dir) {
     int count = navi_count_entries(dir);
     if (count == -1) return false;
@@ -81,14 +83,6 @@ void init() {
     win = newwin(win_height, win_width, start_y, start_x);
     bkgd(COLOR_PAIR(_NAVI_COLORS_LISTING_NORMAL));
     wbkgd(win, COLOR_PAIR(_NAVI_COLORS_LISTING_NORMAL));
-
-    ext_hash_insert(".txt", 0xf15c);
-    ext_hash_insert(".clang-format", 0xe615);
-    ext_hash_insert(".json", 0xe60b);
-    ext_hash_insert(".c", 0xe61e);
-    ext_hash_insert(".cpp", 0xe61d);
-    ext_hash_insert(".h", 0xf0fd);
-    ext_hash_insert(".hpp", 0xf0fd);
 
     if (!pathset) navi_get_pwd(pwd, sizeof(pwd));
     if (!open_dir(pwd)) {
@@ -253,19 +247,13 @@ int main(int argc, char *argv[]) {
                 int col1off = win_width - _NAVI_LISTING_DRAWING_TOP_X;
 
                 file_t file = flisting[i];
-                if (use_nf) {
-                    wchar_t icon =
-                        file.type == FT_DIRECTORY
-                            ? _NAVI_DEFAULT_DIRECTORY_ICON
-                            : ext_hash_lookup(strchr(flisting[i].name, '.'));
-
-                    mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
-                              _NAVI_LISTING_DRAWING_TOP_X, "%lc %s", icon,
-                              file.name);
-                } else
-                    mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
-                              _NAVI_LISTING_DRAWING_TOP_X, "%c %s",
-                              file.type == FT_DIRECTORY ? 'D' : 'F', file.name);
+                wchar_t icon =
+                    file.type == FT_DIRECTORY
+                        ? default_file_icon
+                        : ext_hash_lookup(strrchr(flisting[i].name, '.') + 1);
+                mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
+                          _NAVI_LISTING_DRAWING_TOP_X, "%lc %s", icon,
+                          file.name);
 
                 if (file.type != FT_DIRECTORY) {
                     static char szbuf[64];

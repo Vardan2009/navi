@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "ext_table.h"
 #include "main.h"
 
 void trim_whitespaces(char *str) {
@@ -99,6 +100,18 @@ void parse_apply_navi_cfg() {
             if (*endptr != '\0')
                 navi_errorf("navi.cfg", "Invalid value for %s: `%s`", keypart,
                             valuepart);
+        } else if (strcmp(keypart, "NAVI_DEFAULT_DIR_ICON") == 0) {
+            unsigned int h;
+            sscanf(valuepart, "%x", &h);
+            default_dir_icon = h;
+        } else if (strcmp(keypart, "NAVI_DEFAULT_FILE_ICON") == 0) {
+            unsigned int h;
+            sscanf(valuepart, "%x", &h);
+            default_file_icon = h;
+        } else if (strncmp(keypart, "NAVI_EXT_ICON_", 14) == 0) {
+            unsigned int h;
+            sscanf(valuepart, "%x", &h);
+            ext_hash_insert(keypart + 14, h);
         } else
             navi_errorf("navi.cfg", "Invalid key `%s`", keypart);
     }

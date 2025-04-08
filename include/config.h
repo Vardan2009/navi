@@ -1,7 +1,7 @@
 #ifndef _NAVI_CONFIG_H
 #define _NAVI_CONFIG_H
 
-#define _NAVI_VERSION "0.1"
+#define _NAVI_VERSION "Development Build"
 
 #define _NAVI_LISTING_DRAWING_TOP_Y 4
 #define _NAVI_LISTING_DRAWING_TOP_X 2
@@ -19,9 +19,6 @@
 #define _NAVI_KEY_OPEN 67
 #define _NAVI_KEY_BACK 68
 #define _NAVI_KEY_SELECT 10
-
-#define _NAVI_DEFAULT_FILE_ICON 0xf4a5
-#define _NAVI_DEFAULT_DIRECTORY_ICON 0xf413
 
 // NOTE: These are color pair numbers, not actual color definitions
 #define _NAVI_COLORS_LISTING_NORMAL 1
