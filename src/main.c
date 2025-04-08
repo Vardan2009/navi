@@ -140,8 +140,7 @@ void navi_errorf(const char *title, const char *format, ...) {
 
     mvwprintw(errwin, 1, 2, use_nf ? " %s" : "[ERROR] %s", title);
     mvwprintw(errwin, 3, 2, "%s", buffer);
-    mvwprintw(errwin, win_height - 2, win_width - 8,
-              use_nf ? "[󰌌] OK" : "[any key] OK");
+    mvwprintw(errwin, win_height - 2, 2, use_nf ? "[󰌌] OK" : "[any key] OK");
 
     print_table_borders(errwin, win_width, win_height,
                         (int[]){2, win_height - 3}, 2);
@@ -212,7 +211,7 @@ int main(int argc, char *argv[]) {
 
         mvwprintw(win, win_height - 2,
                   win_width - 6 - _NAVI_LISTING_DRAWING_TOP_X,
-                  use_nf ? " %d%%" : "[SCROLL] %d%%",
+                  use_nf ? " %d%%" : "  %d%%",
                   (int)(((cursor_selected + 1) / (float)flisting_sz) * 100));
 
         if (flisting_sz != 0) {
@@ -249,7 +248,7 @@ int main(int argc, char *argv[]) {
                 file_t file = flisting[i];
                 wchar_t icon =
                     file.type == FT_DIRECTORY
-                        ? default_file_icon
+                        ? default_dir_icon
                         : ext_hash_lookup(strrchr(flisting[i].name, '.') + 1);
                 mvwprintw(win, curpos + _NAVI_LISTING_DRAWING_TOP_Y,
                           _NAVI_LISTING_DRAWING_TOP_X, "%lc %s", icon,
